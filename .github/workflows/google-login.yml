@@ -1,1 +1,30 @@
-test
+name: Google OAuth Client ID Deployment
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on push to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Specifies the environment to run on
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # Check out your code so it can be used in the workflow
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'  # You can specify your Node.js version here
+
+      - name: Install dependencies
+        run: npm install  # Install dependencies (if you're using Node.js)
+
+      - name: Set up Google Client ID
+        run: echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> $GITHUB_ENV
+
+      - name: Deploy or Build Application
+        run: |
+          # Replace this with your actual deployment or application startup command
+          echo "Google Client ID is: $GOOGLE_CLIENT_ID"
