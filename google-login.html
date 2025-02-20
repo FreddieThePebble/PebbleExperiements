@@ -3,70 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log In with Google</title>
-    <script src="https://apis.google.com/js/api:client.js"></script>
-    <style>
-        #profileInfo {
-            margin-top: 20px;
-        }
-    </style>
+    <title>Google OAuth Login</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <h2>Log In with Google</h2>
-    <button id="googleSignInBtn">Log In with Google</button>
 
-    <div id="profileInfo" style="display: none;">
-        <h3>User Information</h3>
-        <p><strong>Name:</strong> <span id="userName"></span></p>
-        <p><strong>Email:</strong> <span id="userEmail"></span></p>
-        <p><strong>Google ID:</strong> <span id="userId"></span></p>
-        <img id="userImage" src="" alt="User Profile Picture" width="100">
-    </div>
+<h1>Google OAuth Login Example</h1>
 
-    <script>
-        let googleAuth;
+<div id="g_id_onload"
+     data-client_id="323760780416-rue2fat9ltv1a0b0nlto22k426r4p9s1.apps.googleusercontent.com"
+     data-callback="handleCredentialResponse">
+</div>
 
-        function startApp() {
-            gapi.load('auth2', function () {
-                googleAuth = gapi.auth2.init({
-                    client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',  // Keep this secret (replace with actual client ID)
-                    cookiepolicy: 'single_host_origin',
-                });
+<!-- This will be the sign-in button -->
+<div id="google-signin-button"></div>
 
-                attachSignin(document.getElementById('googleSignInBtn'));
+<script>
+    function handleCredentialResponse(response) {
+        // Get the ID token from the response
+        const id_token = response.credential;
+        console.log("ID Token:", id_token);
+        
+        // You can send this token to your server to validate it and log the user in
+        // Example: send ID token to the server for verification (using AJAX, fetch, etc.)
+        
+        // For now, just display an alert
+        alert("Login successful! ID Token: " + id_token);
+    }
+
+    // Initialize the Google sign-in button
+    window.onload = function () {
+        google.accounts.id.renderButton(
+            document.getElementById("google-signin-button"), {
+                theme: "outline",
+                size: "large",
             });
-        }
+    };
+</script>
 
-        function attachSignin(element) {
-            googleAuth.attachClickHandler(element, {}, function (googleUser) {
-                let id_token = googleUser.getAuthResponse().id_token;
-
-                // Send the ID token to your backend to validate and get user details
-                fetch('/validate_token', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ token: id_token }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Display the user information returned by the backend
-                    document.getElementById('userName').textContent = data.name;
-                    document.getElementById('userEmail').textContent = data.email;
-                    document.getElementById('userId').textContent = data.id;
-                    document.getElementById('userImage').src = data.imageUrl;
-
-                    // Show the profile information section
-                    document.getElementById('profileInfo').style.display = 'block';
-                })
-                .catch(error => console.error('Error:', error));
-            }, function (error) {
-                console.log(JSON.stringify(error, undefined, 2));
-            });
-        }
-
-        startApp();
-    </script>
 </body>
 </html>
