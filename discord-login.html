@@ -1,1 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Login</title>
+    <script>
+        const clientId = "1341463769028624445";
+        const redirectUri = "https://freddiethepebble.github.io/PebbleExperiements/discord-login";
+        const scope = "identify email connections";
+        const authUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}`;
+
+        async function fetchDiscordData(code) {
+            const tokenUrl = "https://discord.com/api/oauth2/token";
+            const userUrl = "https://discord.com/api/users/@me";
+            
+            const data = new URLSearchParams();
+            data.append("client_id", clientId);
+            data.append("client_secret", "YOUR_CLIENT_SECRET"); // Replace with your client secret (use backend for security)
+            data.append("grant_type", "authorization_code");
+            data.append("code", code);
+            data.append("redirect_uri", redirectUri);
+
+            try {
+                // Exchange code for access token
+                const tokenResponse = await fetch(tokenUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: data
+                });
+
+                const tokenData = await tokenResponse.json();
+                const accessToken = tokenData.access_token;
+
+                // Fetch user data
+                const userResponse = await fetch(userUrl, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                const userData = await userResponse.json();
+                document.getElementById("profile").innerHTML = `
+                    <h2>Welcome, ${userData.username}#${userData.discriminator}</h2>
+                    <p>Email: ${userData.email}</p>
+                    <p>ID: ${userData.id}</p>
+                    <img src="https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png" width="100">
+                `;
+            } catch (error) {
+                console.error("Error fetching Discord data:", error);
+            }
+        }
+
+        function handleLogin() {
+            window.location.href = authUrl;
+        }
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get("code");
+            if (code) {
+                fetchDiscordData(code);
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Login with Discord</h1>
+    <button onclick="handleLogin()">Login</button>
+    <div id="profile"></div>
+</body>
+</html>
 
